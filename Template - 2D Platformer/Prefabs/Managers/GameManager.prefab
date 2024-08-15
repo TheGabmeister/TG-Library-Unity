@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2647966192115300379
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4379357969977517020}
+  - component: {fileID: 3391364773030490067}
+  m_Layer: 0
+  m_Name: GameManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4379357969977517020
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2647966192115300379}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3391364773030490067
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2647966192115300379}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dbac10cadc6d1b745b60cc8180a93d96, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  levels:
+  - {fileID: 11400000, guid: f7e08d7a434b4ed47b56a7439408c379, type: 2}
+  - {fileID: 11400000, guid: e0df96fc2da687e4197f6db604f155bc, type: 2}
+  - {fileID: 11400000, guid: c4f320a76f8ca1d46b72f1c266c31062, type: 2}
+  lives:
+    _useConstant: 0
+    _constantValue: 0
+    _variable: {fileID: 11400000, guid: 1614210bb0b90f44d8dd04aa2b23920f, type: 2}
+  _onStartGame: {fileID: 11400000, guid: 5a291394ddbd5894b82a667437eb596e, type: 2}
+  _onRestartStartGame: {fileID: 11400000, guid: d39ad576923dc0a4e99474af2af722ae, type: 2}
+  _onPlayerDied: {fileID: 11400000, guid: 01eb0fab8daabbf4cb311d95967820b0, type: 2}
+  _onZeroLives: {fileID: 11400000, guid: 8f2c57e4e033c644da10afd710c93b9f, type: 2}
+  _onReachedFinishLine: {fileID: 11400000, guid: 1482d8f6569ad0549aa6b6e5b5e3bf48, type: 2}
+  _onLoadLevel: {fileID: 11400000, guid: c422e39b36ebde9438bb82cde8bfbd68, type: 2}
+  restartLevelEvent: {fileID: 11400000, guid: 1e399331cb7f8a64f8de83bbbd571221, type: 2}
+  playMusicEvent: {fileID: 11400000, guid: 8f4a6d1e76de29340b2cfc7bebdab4a1, type: 2}
+  _onStopMusic: {fileID: 11400000, guid: 2732e793269b2d246aee57402a79fa33, type: 2}
+  showLoadingScreenEvent: {fileID: 11400000, guid: e636c25ee6c9fa348a245d4012cccdcb, type: 2}
+  hideLoadingScreenEvent: {fileID: 11400000, guid: dbdb277ad87d23e4f858b0290d2233ad, type: 2}
+  updateLivesEvent: {fileID: 11400000, guid: 71b7f7e6b17777d44ba546f147771051, type: 2}
