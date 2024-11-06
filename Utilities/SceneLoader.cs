@@ -2,6 +2,10 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using ScriptableObjectArchitecture;
 
+// Other references:
+// https://pastebin.com/Vecczt5Q
+// https://gist.github.com/kurtdekker/862da3bc22ee13aff61a7606ece6fdd3
+
 public class SceneLoader : MonoBehaviour
 {
     [Header("Listen to these events...")]

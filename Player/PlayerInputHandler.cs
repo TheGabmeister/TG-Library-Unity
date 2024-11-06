@@ -8,55 +8,62 @@ using UnityEngine.InputSystem;
  * Documentation: https://docs.unity3d.com/Packages/com.unity.inputsystem@1.11/manual/Workflow-Actions.html
  */
 
-[SerializeField] InputActionAsset _inputActionAsset;
-
-InputAction _moveAction;
-InputAction _jumpAction;
-InputAction _lookAction;
-InputAction _sprintAction;
-InputAction _fireAction;
-
-public Action FireAction = () => { };
-
-public Vector2 MoveInput { get; private set; }
-public Vector2 LookInput { get; private set; }
-public bool JumpTriggered { get; private set; }
-public float SprintValue { get; private set; }
-
-private void OnEnable()
+public class PlayerInputHandler : MonoBehaviour
 {
-    _inputActionAsset.Enable();
-}
+    [SerializeField] InputActionAsset _inputActionAsset;
 
-private void OnDisable()
-{
-    _inputActionAsset.Disable();
-}
+    InputAction _moveAction;
+    InputAction _jumpAction;
+    InputAction _lookAction;
+    InputAction _isSprintPressed;
+    InputAction _fireAction;
 
-private void Start()
-{
-    _moveAction = _inputActionAsset.FindActionMap("Player").FindAction("Move");
-    _jumpAction = _inputActionAsset.FindActionMap("Player").FindAction("Jump");
-    _lookAction = _inputActionAsset.FindActionMap("Player").FindAction("Look");
-    _sprintAction = _inputActionAsset.FindActionMap("Player").FindAction("Sprint");
-    _fireAction = _inputActionAsset.FindActionMap("Player").FindAction("Fire");
+    public Vector2 MoveInput { get; private set; }
+    public Vector2 LookInput { get; private set; }
+    public bool IsSprintPressed { get; private set; }
 
-    _moveAction.performed += context => MoveInput = context.ReadValue<Vector2>();
-    _moveAction.canceled += context => MoveInput = Vector2.zero;
+    public Action JumpAction = () => { };
+    public Action FireAction = () => { };
 
-    _lookAction.performed += context => LookInput = context.ReadValue<Vector2>();
-    _lookAction.canceled += context => LookInput = Vector2.zero;
+    private void OnEnable()
+    {
+        _inputActionAsset.Enable();
+    }
 
-    _jumpAction.performed += context => JumpTriggered = true;
-    _jumpAction.canceled += context => JumpTriggered = false;
+    private void OnDisable()
+    {
+        _inputActionAsset.Disable();
+    }
 
-    _sprintAction.performed += context => SprintValue = context.ReadValue<float>();
-    _sprintAction.canceled += context => SprintValue = 0f;
+    private void Start()
+    {
+        _moveAction = _inputActionAsset.FindActionMap("Player").FindAction("Move");
+        _jumpAction = _inputActionAsset.FindActionMap("Player").FindAction("Jump");
+        _lookAction = _inputActionAsset.FindActionMap("Player").FindAction("Look");
+        _isSprintPressed = _inputActionAsset.FindActionMap("Player").FindAction("Sprint");
+        _fireAction = _inputActionAsset.FindActionMap("Player").FindAction("Fire");
 
-    _fireAction.started += context => Fire(context);
-}
+        _moveAction.performed += context => MoveInput = context.ReadValue<Vector2>();
+        _moveAction.canceled += context => MoveInput = Vector2.zero;
 
-void Fire(InputAction.CallbackContext context)
-{
-    FireAction?.Invoke();
+        _lookAction.performed += context => LookInput = context.ReadValue<Vector2>();
+        _lookAction.canceled += context => LookInput = Vector2.zero;
+
+        _isSprintPressed.performed += context => IsSprintPressed = true;
+        _isSprintPressed.canceled += context => IsSprintPressed = false;
+
+        _jumpAction.started += context => Jump(context);
+
+        _fireAction.started += context => Fire(context);
+    }
+
+    void Fire(InputAction.CallbackContext context)
+    {
+        FireAction?.Invoke();
+    }
+
+    void Jump(InputAction.CallbackContext context)
+    {
+        JumpAction?.Invoke();
+    }
 }
