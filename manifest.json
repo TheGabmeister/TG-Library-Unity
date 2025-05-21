@@ -1,7 +1,6 @@
 {
   "dependencies": {
     "com.marijnzwemmer.unity-toolbar-extender": "https://github.com/marijnz/unity-toolbar-extender.git",
-    "com.sag.main-scene-auto-loading": "https://github.com/STARasGAMES/unity-main-scene-auto-loading.git#upm",
     "com.unity.feature.2d": "2.0.1",
     "com.unity.ide.visualstudio": "2.0.23",
     "com.unity.inputsystem": "1.14.0",
