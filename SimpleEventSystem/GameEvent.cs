@@ -30,14 +30,14 @@ public class Player : MonoBehaviour
 {
     private void OnEnable()
     {
-        Events.Player.onJump.Add(OnPickup);
-        Events.Player.onDamage.Add(OnDamage);
+        Events.Player.OnJump.Add(OnPickup);
+        Events.Player.OnDamage.Add(OnDamage);
     }
 
     private void OnDisable()
     {
-        Events.Player.onJump.Remove(OnPickup);
-        Events.Player.onDamage.Remove(OnDamage);
+        Events.Player.OnJump.Remove(OnPickup);
+        Events.Player.OnDamage.Remove(OnDamage);
     }
 
     private void OnPickup(GameObject item)
@@ -60,7 +60,7 @@ public class Pickup : MonoBehaviour
     {
         if (other.CompareTag("player"))
         {
-            Events.Item.onPickup.Publish(gameObject);
+            Events.Item.OnPickup.Publish(gameObject);
         }
     }
 }

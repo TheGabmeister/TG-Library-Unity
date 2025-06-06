@@ -17,13 +17,13 @@ namespace SimpleEventSystem
     // You can put this in a separate script
     public class PlayerEvents
     {
-        public static readonly GameEvent onJump = new();
-        public static readonly GameEvent<float> onDamage = new();
+        public static readonly GameEvent OnJump = new();
+        public static readonly GameEvent<float> OnDamage = new();
     }
 
     public class ItemEvents
     {
-        public static readonly GameEvent<GameObject> onPickup = new();
+        public static readonly GameEvent<GameObject> OnPickup = new();
     }
 }
 
