@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class DestroyAfterTime : MonoBehaviour
 {
-    [SerializeField] bool _startCountdownImmediately = false;
-    [SerializeField] float _destroyAfterSeconds = 0f;
+    [SerializeField] bool _startCountdownImmediately = true;
+    [SerializeField] float _destroyAfterSeconds = 5f;
 
     void Start()
     {
