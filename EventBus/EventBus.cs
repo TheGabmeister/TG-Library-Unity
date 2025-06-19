@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace EventBus
-{ 
+{
     public static class Bus<T> where T : IEvent, new()
     {
         private static readonly HashSet<Action> BindingsWithoutArgs = new();
