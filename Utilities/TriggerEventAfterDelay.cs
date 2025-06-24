@@ -5,19 +5,16 @@ using UnityEngine.Events;
 
 public class TriggerEventAfterDelay : MonoBehaviour
 {
+    [SerializeField] float _delay;
     [SerializeField] UnityEvent _unityEvent;
     
-    private IEnumerator _coroutine;
-
-    public void TriggerEvent(float delay)
+    void Start()
     {
-        _coroutine = TriggerEventDelayed(delay);
-        StartCoroutine(_coroutine);
+        Invoke("TriggerEvent", _delay);
     }
 
-    private IEnumerator TriggerEventDelayed(float waitTime)
+    public void TriggerEvent()
     {
-        yield return new WaitForSeconds(waitTime);
         _unityEvent?.Invoke();
     }
 }
