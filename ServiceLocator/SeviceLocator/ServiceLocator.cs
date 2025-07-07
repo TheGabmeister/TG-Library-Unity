@@ -5,8 +5,10 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace UnityServiceLocator {
-    public class ServiceLocator : MonoBehaviour {
+namespace UnityServiceLocator 
+{
+    public class ServiceLocator : MonoBehaviour 
+    {
         static ServiceLocator global;
         static Dictionary<Scene, ServiceLocator> sceneContainers;
         static List<GameObject> tmpSceneGameObjects;
@@ -16,21 +18,27 @@ namespace UnityServiceLocator {
         const string k_globalServiceLocatorName = "ServiceLocator [Global]";
         const string k_sceneServiceLocatorName = "ServiceLocator [Scene]";
 
-        internal void ConfigureAsGlobal(bool dontDestroyOnLoad) {
-            if (global == this) {
+        internal void ConfigureAsGlobal(bool dontDestroyOnLoad) 
+        {
+            if (global == this) 
+            {
                 Debug.LogWarning("ServiceLocator.ConfigureAsGlobal: Already configured as global", this);
-            } else if (global != null) {
+            } else if (global != null) 
+            {
                 Debug.LogError("ServiceLocator.ConfigureAsGlobal: Another ServiceLocator is already configured as global", this);
-            } else {
+            } else 
+            {
                 global = this;
                 if (dontDestroyOnLoad) DontDestroyOnLoad(gameObject);
             }
         }
 
-        internal void ConfigureForScene() {
+        internal void ConfigureForScene() 
+        {
             Scene scene = gameObject.scene;
 
-            if (sceneContainers.ContainsKey(scene)) {
+            if (sceneContainers.ContainsKey(scene)) 
+            {
                 Debug.LogError("ServiceLocator.ConfigureForScene: Another ServiceLocator is already configured for this scene", this);
                 return;
             }
@@ -41,7 +49,8 @@ namespace UnityServiceLocator {
         /// <summary>
         /// Gets the global ServiceLocator instance. Creates new if none exists.
         /// </summary>        
-        public static ServiceLocator Global {
+        public static ServiceLocator Global 
+        {
             get {
                 if (global != null) return global;
 
@@ -60,7 +69,8 @@ namespace UnityServiceLocator {
         /// <summary>
         /// Returns the <see cref="ServiceLocator"/> configured for the scene of a MonoBehaviour. Falls back to the global instance.
         /// </summary>
-        public static ServiceLocator ForSceneOf(MonoBehaviour mb) {
+        public static ServiceLocator ForSceneOf(MonoBehaviour mb) 
+        {
             Scene scene = mb.gameObject.scene;
             
             if (sceneContainers.TryGetValue(scene, out ServiceLocator container) && container != mb) {
@@ -70,8 +80,10 @@ namespace UnityServiceLocator {
             tmpSceneGameObjects.Clear();
             scene.GetRootGameObjects(tmpSceneGameObjects);
 
-            foreach (GameObject go in tmpSceneGameObjects.Where(go => go.GetComponent<ServiceLocatorScene>() != null)) {
-                if (go.TryGetComponent(out ServiceLocatorScene bootstrapper) && bootstrapper.Container != mb) {
+            foreach (GameObject go in tmpSceneGameObjects.Where(go => go.GetComponent<ServiceLocatorScene>() != null)) 
+            {
+                if (go.TryGetComponent(out ServiceLocatorScene bootstrapper) && bootstrapper.Container != mb) 
+                {
                     bootstrapper.BootstrapOnDemand();
                     return bootstrapper.Container;
                 }
@@ -84,7 +96,8 @@ namespace UnityServiceLocator {
         /// Gets the closest ServiceLocator instance to the provided 
         /// MonoBehaviour in hierarchy, the ServiceLocator for its scene, or the global ServiceLocator.
         /// </summary>
-        public static ServiceLocator For(MonoBehaviour mb) {
+        public static ServiceLocator For(MonoBehaviour mb) 
+        {
             return mb.GetComponentInParent<ServiceLocator>().OrNull() ?? ForSceneOf(mb) ?? Global;
         }
         
@@ -94,7 +107,8 @@ namespace UnityServiceLocator {
         /// <param name="service">The service to register.</param>  
         /// <typeparam name="T">Class type of the service to be registered.</typeparam>
         /// <returns>The ServiceLocator instance after registering the service.</returns>
-        public ServiceLocator Register<T>(T service) {
+        public ServiceLocator Register<T>(T service) 
+        {
             services.Register(service);
             return this;
         }
@@ -105,7 +119,8 @@ namespace UnityServiceLocator {
         /// <param name="type">The type to use for registration.</param>
         /// <param name="service">The service to register.</param>  
         /// <returns>The ServiceLocator instance after registering the service.</returns>
-        public ServiceLocator Register(Type type, object service) {
+        public ServiceLocator Register(Type type, object service) 
+        {
             services.Register(type, service);
             return this;
         }
@@ -116,10 +131,12 @@ namespace UnityServiceLocator {
         /// <param name="service">Service of type T to get.</param>  
         /// <typeparam name="T">Class type of the service to be retrieved.</typeparam>
         /// <returns>The ServiceLocator instance after attempting to retrieve the service.</returns>
-        public ServiceLocator Get<T>(out T service) where T : class {
+        public ServiceLocator Get<T>(out T service) where T : class 
+        {
             if (TryGetService(out service)) return this;
             
-            if (TryGetNextInHierarchy(out ServiceLocator container)) {
+            if (TryGetNextInHierarchy(out ServiceLocator container)) 
+            {
                 container.Get(out service);
                 return this;
             }
@@ -151,7 +168,8 @@ namespace UnityServiceLocator {
         /// <param name="service">Service of type T to get.</param>  
         /// <typeparam name="T">Class type of the service to be retrieved.</typeparam>
         /// <returns>True if the service retrieval was successful, false otherwise.</returns>
-        public bool TryGet<T>(out T service) where T : class {
+        public bool TryGet<T>(out T service) where T : class 
+        {
             Type type = typeof(T);
             service = null;
 
@@ -161,16 +179,20 @@ namespace UnityServiceLocator {
             return TryGetNextInHierarchy(out ServiceLocator container) && container.TryGet(out service);
         }        
         
-        bool TryGetService<T>(out T service) where T : class {
+        bool TryGetService<T>(out T service) where T : class 
+        {
             return services.TryGet(out service);
         }
         
-        bool TryGetService<T>(Type type, out T service) where T : class {
+        bool TryGetService<T>(Type type, out T service) where T : class 
+        {
             return services.TryGet(out service);
         }
         
-        bool TryGetNextInHierarchy(out ServiceLocator container) {
-            if (this == global) {
+        bool TryGetNextInHierarchy(out ServiceLocator container) 
+        {
+            if (this == global) 
+            {
                 container = null;
                 return false;
             }
@@ -179,17 +201,22 @@ namespace UnityServiceLocator {
             return container != null;
         }
         
-        void OnDestroy() {
-            if (this == global) {
+        void OnDestroy() 
+        {
+            if (this == global) 
+            {
                 global = null;
-            } else if (sceneContainers.ContainsValue(this)) {
+            } 
+            else if (sceneContainers.ContainsValue(this)) 
+            {
                 sceneContainers.Remove(gameObject.scene);
             }
         }
         
         // https://docs.unity3d.com/ScriptReference/RuntimeInitializeOnLoadMethodAttribute.html
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetStatics() {
+        static void ResetStatics() 
+        {
             global = null;
             sceneContainers = new Dictionary<Scene, ServiceLocator>();
             tmpSceneGameObjects = new List<GameObject>();
@@ -197,12 +224,14 @@ namespace UnityServiceLocator {
 
 #if UNITY_EDITOR
         [MenuItem("GameObject/ServiceLocator/Add Global")]
-        static void AddGlobal() {
+        static void AddGlobal() 
+        {
             var go = new GameObject(k_globalServiceLocatorName, typeof(ServiceLocatorGlobal));
         }
 
         [MenuItem("GameObject/ServiceLocator/Add Scene")]
-        static void AddScene() {
+        static void AddScene() 
+        {
             var go = new GameObject(k_sceneServiceLocatorName, typeof(ServiceLocatorScene));
         }
 #endif

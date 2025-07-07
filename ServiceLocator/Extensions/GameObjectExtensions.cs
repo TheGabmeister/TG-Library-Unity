@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 
-public static class GameObjectExtensions {
+public static class GameObjectExtensions 
+{
     /// <summary>
     /// Returns the object itself if it exists, null otherwise.
     /// </summary>
