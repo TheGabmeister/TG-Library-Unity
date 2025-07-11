@@ -7,17 +7,17 @@ public class Player : MonoBehaviour
 
     private void Start()
     {
-        Bus<E_Player_Spawned>.Raise();
+        Bus<EV_Player_Spawned>.Raise();
     }
 
     void Died()
     {
-        Bus<E_Player_Died>.Raise();
+        Bus<EV_Player_Died>.Raise();
     }
 
     void TakeDamage()
     {
-        Bus<E_Player_Damaged>.Raise(new E_Player_Damaged { value = 5 });
-        Bus<E_SFX_Play>.Raise(new E_SFX_Play { value = _dieSound });
+        Bus<EV_Player_Damaged>.Raise(new EV_Player_Damaged { value = 5 });
+        Bus<EV_SFX_Play>.Raise(new EV_SFX_Play { value = _dieSound });
     }   
 }
