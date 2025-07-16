@@ -1,0 +1,12 @@
+> adb shell ip route
+192.168.1.0/24 dev wlan0 proto kernel scope link src 192.168.1.6
+
+> adb tcpip 5555
+restarting in TCP mode port: 5555
+
+> adb connect 192.168.1.6:5555
+connected to 192.168.1.6:5555
+
+> adb install -r "C:\Users\User\My Drive\Builds\MRTest.apk"
+Performing Streamed Install
+Success
