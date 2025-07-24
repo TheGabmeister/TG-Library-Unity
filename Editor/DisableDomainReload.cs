@@ -5,7 +5,7 @@ using UnityToolbarExtender;
 /* 
  * This script adds a button to the right of the Play Mode button in the toolbar. 
  * When pressed, the button disables domain reload.
- * Depends on https://github.com/marijnz/unity-toolbar-extender
+ * Install package using Git URL: https://github.com/marijnz/unity-toolbar-extender.git
  */
 
 [InitializeOnLoad]
