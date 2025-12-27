@@ -48,7 +48,38 @@ namespace SimpleEventSystem
     }
 }
 
-// Example usage
-// using SimpleEventSystem;
-// PlayerEvents.Died.Sub(OnPlayerDied);
-// MusicEvents.Play.Raise(audioClip);
+/* Example usage
+
+using SimpleEventSystem;
+
+private void OnEnable()
+{
+    Events.PauseToggled.Sub(OnPauseToggled);
+}
+private void OnDisable()
+{
+    Events.PauseToggled.Unsub(OnPauseToggled);
+}
+
+private void Start()
+{
+    MusicEvents.Play.Raise(audioClip);
+}
+
+
+*/
+
+
+/* A simpler event system without the GameEvent wrapper. Based on Parrot Sample:
+
+public class GameplayEvents
+{
+    public static Action<ParrotGameState> GameStateInitialized;
+    public static Action<ELevelState> LevelStateChanged;
+    public static Action PauseGame;
+    public static Action ResumeGame;
+    public static Action GameOver;
+    public static Action Victory;
+}
+
+*/
