@@ -1,51 +1,43 @@
 ﻿using UnityEditor;
-using UnityEngine;
-using UnityToolbarExtender;
-
-/* 
- * This script adds a button to the right of the Play Mode button in the toolbar. 
- * When pressed, the button disables domain reload.
- * Install package using Git URL: https://github.com/marijnz/unity-toolbar-extender.git
- */
 
 [InitializeOnLoad]
 public static class DisableDomainReload
 {
-    static bool m_enabled;
+    const string MenuPath = "Tools/Disable Domain Reload";
 
-    static bool Enabled
-    {
-        get { return m_enabled; }
-        set
-        {
-            m_enabled = value;
-        }
-    }
+    static bool m_enabled;
 
     static DisableDomainReload()
     {
-        ToolbarExtender.RightToolbarGUI.Add(OnToolbarGUI);
+        // Initialize from current Editor settings (so the menu state matches on load).
+        m_enabled = EditorSettings.enterPlayModeOptionsEnabled
+            && (EditorSettings.enterPlayModeOptions & EnterPlayModeOptions.DisableDomainReload) != 0;
+
+        Apply(m_enabled);
     }
 
-    static void OnToolbarGUI()
+    [MenuItem(MenuPath, priority = 2000)]
+    static void ToggleMenu()
     {
-        var tex = EditorGUIUtility.IconContent(@"UnityEditor.SceneView").image;
+        m_enabled = !m_enabled;
+        Apply(m_enabled);
+    }
 
-        GUI.changed = false;
-        GUILayout.Toggle(m_enabled, new GUIContent(null, tex, "Disable Domain Reload"), "Command");
-        if (GUI.changed)
+    // Validation method: runs to draw/enable the menu item. Returning true keeps it enabled.
+    [MenuItem(MenuPath, validate = true)]
+    static bool ToggleMenuValidate()
+    {
+        Menu.SetChecked(MenuPath, m_enabled);
+        return true;
+    }
+
+    static void Apply(bool enabled)
+    {
+        EditorSettings.enterPlayModeOptionsEnabled = enabled;
+
+        if (enabled)
         {
-            Enabled = !Enabled;
-
-            if (m_enabled)
-            {
-                EditorSettings.enterPlayModeOptionsEnabled = m_enabled;
-                EditorSettings.enterPlayModeOptions = EnterPlayModeOptions.DisableDomainReload;
-            }
-            else
-            {
-                EditorSettings.enterPlayModeOptionsEnabled = m_enabled;
-            }
+            EditorSettings.enterPlayModeOptions = EnterPlayModeOptions.DisableDomainReload;
         }
     }
 }
