@@ -70,16 +70,19 @@ private void Start()
 */
 
 
-/* A simpler event system without the GameEvent wrapper. Based on Parrot Sample:
+/* A simpler event system without safety guards:
 
 public class GameplayEvents
 {
-    public static Action<ParrotGameState> GameStateInitialized;
+    public static Action<GameState> GameStateInitialized;
     public static Action<ELevelState> LevelStateChanged;
     public static Action PauseGame;
     public static Action ResumeGame;
     public static Action GameOver;
     public static Action Victory;
 }
+
+Example usage:
+GameplayEvents.GameStateInitialized?.Invoke(gameState);
 
 */
