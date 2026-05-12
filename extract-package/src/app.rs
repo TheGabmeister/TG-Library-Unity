@@ -6,12 +6,123 @@ use eframe::egui;
 
 use crate::package::{self, ExtractMessage};
 
-#[derive(Clone, Copy)]
-enum LogLevel {
-    Info,
-    Warning,
-    Error,
+// ── Color Palette ──────────────────────────────────────────────────────────
+
+const BG_DARK: egui::Color32 = egui::Color32::from_rgb(12, 12, 18);
+const BG_CARD: egui::Color32 = egui::Color32::from_rgb(20, 20, 28);
+const BG_ELEVATED: egui::Color32 = egui::Color32::from_rgb(30, 30, 42);
+const BG_TERMINAL: egui::Color32 = egui::Color32::from_rgb(8, 8, 12);
+const BORDER: egui::Color32 = egui::Color32::from_rgb(42, 42, 58);
+const BORDER_SUBTLE: egui::Color32 = egui::Color32::from_rgb(32, 32, 45);
+const TEXT_PRIMARY: egui::Color32 = egui::Color32::from_rgb(228, 228, 238);
+const TEXT_SECONDARY: egui::Color32 = egui::Color32::from_rgb(125, 125, 150);
+const TEXT_DIM: egui::Color32 = egui::Color32::from_rgb(80, 80, 100);
+const ACCENT: egui::Color32 = egui::Color32::from_rgb(99, 102, 241);
+const ACCENT_GLOW: egui::Color32 = egui::Color32::from_rgb(22, 22, 45);
+const SUCCESS: egui::Color32 = egui::Color32::from_rgb(52, 211, 113);
+const WARNING: egui::Color32 = egui::Color32::from_rgb(251, 191, 36);
+const ERROR: egui::Color32 = egui::Color32::from_rgb(248, 88, 88);
+
+// ── Theme Setup ────────────────────────────────────────────────────────────
+
+pub fn setup_theme(ctx: &egui::Context) {
+    let mut visuals = egui::Visuals::dark();
+
+    visuals.panel_fill = BG_DARK;
+    visuals.window_fill = BG_DARK;
+    visuals.extreme_bg_color = BG_TERMINAL;
+    visuals.faint_bg_color = BG_CARD;
+
+    let r = egui::CornerRadius::same(6);
+
+    visuals.widgets.noninteractive.bg_fill = BG_CARD;
+    visuals.widgets.noninteractive.weak_bg_fill = BG_CARD;
+    visuals.widgets.noninteractive.bg_stroke = egui::Stroke::new(1.0, BORDER_SUBTLE);
+    visuals.widgets.noninteractive.fg_stroke = egui::Stroke::new(1.0, TEXT_SECONDARY);
+    visuals.widgets.noninteractive.corner_radius = r;
+
+    visuals.widgets.inactive.bg_fill = BG_ELEVATED;
+    visuals.widgets.inactive.weak_bg_fill = BG_ELEVATED;
+    visuals.widgets.inactive.bg_stroke = egui::Stroke::new(1.0, BORDER);
+    visuals.widgets.inactive.fg_stroke = egui::Stroke::new(1.0, TEXT_PRIMARY);
+    visuals.widgets.inactive.corner_radius = r;
+
+    visuals.widgets.hovered.bg_fill = egui::Color32::from_rgb(44, 44, 64);
+    visuals.widgets.hovered.weak_bg_fill = egui::Color32::from_rgb(44, 44, 64);
+    visuals.widgets.hovered.bg_stroke = egui::Stroke::new(1.0, ACCENT);
+    visuals.widgets.hovered.fg_stroke = egui::Stroke::new(1.5, egui::Color32::WHITE);
+    visuals.widgets.hovered.corner_radius = r;
+
+    visuals.widgets.active.bg_fill = ACCENT;
+    visuals.widgets.active.weak_bg_fill = ACCENT;
+    visuals.widgets.active.bg_stroke = egui::Stroke::new(0.0, egui::Color32::TRANSPARENT);
+    visuals.widgets.active.fg_stroke = egui::Stroke::new(1.0, egui::Color32::WHITE);
+    visuals.widgets.active.corner_radius = r;
+
+    visuals.widgets.open.bg_fill = egui::Color32::from_rgb(28, 28, 42);
+    visuals.widgets.open.weak_bg_fill = egui::Color32::from_rgb(28, 28, 42);
+    visuals.widgets.open.bg_stroke = egui::Stroke::new(1.0, BORDER);
+    visuals.widgets.open.fg_stroke = egui::Stroke::new(1.0, TEXT_PRIMARY);
+    visuals.widgets.open.corner_radius = r;
+
+    visuals.selection.bg_fill = egui::Color32::from_rgb(50, 52, 110);
+    visuals.selection.stroke = egui::Stroke::new(1.0, ACCENT);
+
+    visuals.window_corner_radius = egui::CornerRadius::same(10);
+    visuals.window_stroke = egui::Stroke::new(1.0, BORDER);
+
+    ctx.set_visuals(visuals);
+
+    let mut style = (*ctx.style()).clone();
+    style.spacing.item_spacing = egui::vec2(8.0, 6.0);
+    style.spacing.button_padding = egui::vec2(14.0, 6.0);
+    ctx.set_style(style);
 }
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+
+fn card_frame() -> egui::Frame {
+    egui::Frame::NONE
+        .fill(BG_CARD)
+        .stroke(egui::Stroke::new(1.0, BORDER_SUBTLE))
+        .corner_radius(10)
+        .inner_margin(16.0)
+}
+
+fn section_heading(ui: &mut egui::Ui, label: &str) {
+    ui.label(
+        egui::RichText::new(label.to_uppercase())
+            .size(10.5)
+            .strong()
+            .color(TEXT_DIM),
+    );
+    ui.add_space(6.0);
+}
+
+fn progress_bar(ui: &mut egui::Ui, fraction: f32, text: &str) {
+    let desired = egui::vec2(ui.available_width(), 26.0);
+    let (rect, _) = ui.allocate_exact_size(desired, egui::Sense::hover());
+    let painter = ui.painter();
+    let rounding = egui::CornerRadius::same(13);
+
+    painter.rect_filled(rect, rounding, BG_ELEVATED);
+
+    if fraction > 0.0 {
+        let w = (rect.width() * fraction.clamp(0.0, 1.0)).max(rect.height());
+        let fill = egui::Rect::from_min_size(rect.min, egui::vec2(w, rect.height()));
+        painter.rect_filled(fill, rounding, ACCENT);
+    }
+
+    painter.text(
+        rect.center(),
+        egui::Align2::CENTER_CENTER,
+        text,
+        egui::FontId::proportional(11.0),
+        egui::Color32::WHITE,
+    );
+}
+
+// ── Tree ───────────────────────────────────────────────────────────────────
 
 struct TreeNode {
     children: BTreeMap<String, TreeNode>,
@@ -46,19 +157,33 @@ impl TreeNode {
         for (name, node) in &self.children {
             if node.children.is_empty() {
                 ui.horizontal(|ui| {
-                    ui.add_space(18.0);
-                    ui.label(name);
+                    ui.add_space(20.0);
+                    ui.label(egui::RichText::new(name).size(12.5).color(TEXT_SECONDARY));
                 });
             } else {
-                egui::CollapsingHeader::new(name)
-                    .default_open(depth < 1)
-                    .show(ui, |ui| {
-                        node.show(ui, depth + 1);
-                    });
+                egui::CollapsingHeader::new(
+                    egui::RichText::new(name).size(12.5).color(TEXT_PRIMARY),
+                )
+                .default_open(depth < 1)
+                .show(ui, |ui| {
+                    node.show(ui, depth + 1);
+                });
             }
         }
     }
 }
+
+// ── Log Level ──────────────────────────────────────────────────────────────
+
+#[derive(Clone, Copy)]
+enum LogLevel {
+    Info,
+    Success,
+    Warning,
+    Error,
+}
+
+// ── App State ──────────────────────────────────────────────────────────────
 
 pub struct App {
     package_path: Option<PathBuf>,
@@ -98,6 +223,8 @@ impl Default for App {
         }
     }
 }
+
+// ── Logic ──────────────────────────────────────────────────────────────────
 
 impl App {
     fn load_file(&mut self, path: PathBuf) {
@@ -194,16 +321,23 @@ impl App {
                         warnings,
                     } => {
                         self.progress = (total, total);
-                        let status = if errors > 0 {
-                            format!(
-                                "Completed with errors: {errors} errors, {warnings} warnings"
+                        let (level, status) = if errors > 0 {
+                            (
+                                LogLevel::Error,
+                                format!("Completed with {errors} errors, {warnings} warnings"),
                             )
                         } else if warnings > 0 {
-                            format!("Done! {total} files extracted ({warnings} warnings)")
+                            (
+                                LogLevel::Success,
+                                format!("Done! {total} files extracted ({warnings} warnings)"),
+                            )
                         } else {
-                            format!("Done! {total} files extracted successfully")
+                            (
+                                LogLevel::Success,
+                                format!("Done! {total} files extracted successfully"),
+                            )
                         };
-                        self.log.push((LogLevel::Info, status));
+                        self.log.push((level, status));
                         self.extracting = false;
                         self.done = true;
                         finished = true;
@@ -216,6 +350,8 @@ impl App {
         }
     }
 }
+
+// ── Rendering ──────────────────────────────────────────────────────────────
 
 impl eframe::App for App {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
@@ -236,152 +372,293 @@ impl eframe::App for App {
 
         let hovering = ctx.input(|i| !i.raw.hovered_files.is_empty());
 
-        egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading("Unity Package Extractor");
-            ui.add_space(8.0);
+        egui::CentralPanel::default()
+            .frame(egui::Frame::NONE.fill(BG_DARK).inner_margin(24.0))
+            .show(ctx, |ui| {
+                egui::ScrollArea::vertical()
+                    .id_salt("main_scroll")
+                    .show(ui, |ui| {
+                        self.render_header(ui);
+                        ui.add_space(20.0);
+                        self.render_drop_zone(ui, hovering);
 
-            // --- File Selection ---
-            let pkg_name = self
-                .package_path
-                .as_ref()
-                .and_then(|p| p.file_name())
-                .map(|n| n.to_string_lossy().to_string());
+                        if self.preview_loading {
+                            ui.add_space(14.0);
+                            ui.horizontal(|ui| {
+                                ui.spinner();
+                                ui.label(
+                                    egui::RichText::new("Scanning package contents...")
+                                        .size(13.0)
+                                        .color(TEXT_SECONDARY),
+                                );
+                            });
+                        }
 
-            let frame = if hovering {
-                egui::Frame::group(ui.style())
-                    .stroke(egui::Stroke::new(2.0, egui::Color32::LIGHT_BLUE))
-            } else {
-                egui::Frame::group(ui.style())
-            };
+                        if let Some(err) = self.preview_error.clone() {
+                            ui.add_space(14.0);
+                            ui.label(
+                                egui::RichText::new(format!("Error: {err}"))
+                                    .size(13.0)
+                                    .color(ERROR),
+                            );
+                        }
 
-            frame.show(ui, |ui| {
-                ui.set_min_height(50.0);
+                        if !self.entries.is_empty() {
+                            ui.add_space(20.0);
+                            self.render_preview(ui);
+                            ui.add_space(20.0);
+                            self.render_settings(ui);
+                            ui.add_space(16.0);
+                            self.render_extract_button(ui);
+                        }
+
+                        if self.extracting || self.done {
+                            ui.add_space(20.0);
+                            self.render_progress_section(ui);
+                        }
+                    });
+            });
+    }
+}
+
+impl App {
+    fn render_header(&self, ui: &mut egui::Ui) {
+        ui.horizontal(|ui| {
+            ui.label(egui::RichText::new("//").size(28.0).strong().color(ACCENT));
+            ui.add_space(6.0);
+            ui.vertical(|ui| {
+                ui.add_space(2.0);
+                ui.label(
+                    egui::RichText::new("Unity Package Extractor")
+                        .size(20.0)
+                        .strong()
+                        .color(TEXT_PRIMARY),
+                );
+                ui.label(
+                    egui::RichText::new("Preview and extract .unitypackage files")
+                        .size(12.0)
+                        .color(TEXT_DIM),
+                );
+            });
+        });
+    }
+
+    fn render_drop_zone(&mut self, ui: &mut egui::Ui, hovering: bool) {
+        let pkg_name = self
+            .package_path
+            .as_ref()
+            .and_then(|p| p.file_name())
+            .map(|n| n.to_string_lossy().to_string());
+
+        let bg = if hovering { ACCENT_GLOW } else { BG_CARD };
+        let stroke = if hovering {
+            egui::Stroke::new(1.5, ACCENT)
+        } else {
+            egui::Stroke::new(1.0, BORDER_SUBTLE)
+        };
+
+        egui::Frame::NONE
+            .fill(bg)
+            .stroke(stroke)
+            .corner_radius(12)
+            .inner_margin(egui::Margin::symmetric(24, 28))
+            .show(ui, |ui| {
                 ui.set_width(ui.available_width());
                 ui.vertical_centered(|ui| {
                     if let Some(ref name) = pkg_name {
-                        ui.strong(name);
+                        ui.label(
+                            egui::RichText::new(name)
+                                .size(15.0)
+                                .strong()
+                                .color(TEXT_PRIMARY),
+                        );
+                        ui.add_space(8.0);
+                        if styled_button(ui, "Change File", false) {
+                            self.browse_file();
+                        }
                     } else if hovering {
-                        ui.strong("Drop here!");
+                        ui.label(
+                            egui::RichText::new("Release to open")
+                                .size(16.0)
+                                .strong()
+                                .color(ACCENT),
+                        );
                     } else {
-                        ui.label("Drag & drop a .unitypackage file here");
-                    }
-                    if ui.button("Browse...").clicked() {
-                        if let Some(path) = rfd::FileDialog::new()
-                            .add_filter("Unity Package", &["unitypackage"])
-                            .pick_file()
-                        {
-                            self.load_file(path);
+                        ui.label(
+                            egui::RichText::new("Drag & drop a .unitypackage file")
+                                .size(14.0)
+                                .color(TEXT_SECONDARY),
+                        );
+                        ui.add_space(10.0);
+                        if styled_button(ui, "Browse Files", true) {
+                            self.browse_file();
                         }
                     }
                 });
             });
+    }
 
-            // --- Loading ---
-            if self.preview_loading {
-                ui.add_space(8.0);
-                ui.horizontal(|ui| {
-                    ui.spinner();
-                    ui.label("Loading package contents...");
-                });
+    fn browse_file(&mut self) {
+        if let Some(path) = rfd::FileDialog::new()
+            .add_filter("Unity Package", &["unitypackage"])
+            .pick_file()
+        {
+            self.load_file(path);
+        }
+    }
+
+    fn render_preview(&self, ui: &mut egui::Ui) {
+        card_frame().show(ui, |ui| {
+            ui.set_width(ui.available_width());
+
+            section_heading(ui, "Contents");
+
+            ui.label(
+                egui::RichText::new(format!("{} entries", self.entries.len()))
+                    .size(12.0)
+                    .color(TEXT_DIM),
+            );
+            ui.add_space(8.0);
+
+            let mut tree = TreeNode::new();
+            for path in &self.entries {
+                tree.insert(path);
             }
 
-            // --- Error ---
-            if let Some(ref err) = self.preview_error {
-                ui.add_space(8.0);
-                ui.colored_label(
-                    egui::Color32::from_rgb(255, 80, 80),
-                    format!("Error: {err}"),
+            egui::ScrollArea::vertical()
+                .id_salt("preview_tree")
+                .max_height(200.0)
+                .show(ui, |ui| {
+                    tree.show(ui, 0);
+                });
+        });
+    }
+
+    fn render_settings(&mut self, ui: &mut egui::Ui) {
+        card_frame().show(ui, |ui| {
+            ui.set_width(ui.available_width());
+
+            section_heading(ui, "Output");
+
+            ui.horizontal(|ui| {
+                let text_width = (ui.available_width() - 90.0).max(100.0);
+                ui.add(
+                    egui::TextEdit::singleline(&mut self.output_dir).desired_width(text_width),
                 );
-            }
-
-            // --- Preview Tree ---
-            if !self.entries.is_empty() {
-                ui.add_space(8.0);
-                ui.label(format!("Contents ({} entries):", self.entries.len()));
-
-                let mut tree = TreeNode::new();
-                for path in &self.entries {
-                    tree.insert(path);
-                }
-
-                egui::ScrollArea::vertical()
-                    .id_salt("preview_tree")
-                    .max_height(200.0)
-                    .show(ui, |ui| {
-                        tree.show(ui, 0);
-                    });
-
-                ui.add_space(8.0);
-                ui.separator();
-
-                // --- Output Settings ---
-                ui.horizontal(|ui| {
-                    ui.label("Output:");
-                    let text_width = (ui.available_width() - 80.0).max(100.0);
-                    ui.add(
-                        egui::TextEdit::singleline(&mut self.output_dir)
-                            .desired_width(text_width),
-                    );
-                    if ui.button("Browse...").clicked() {
-                        if let Some(folder) = rfd::FileDialog::new().pick_folder() {
-                            self.output_dir = folder.to_string_lossy().to_string();
-                        }
+                if styled_button(ui, "Browse", false) {
+                    if let Some(folder) = rfd::FileDialog::new().pick_folder() {
+                        self.output_dir = folder.to_string_lossy().to_string();
                     }
-                });
-
-                ui.checkbox(&mut self.include_meta, "Include .meta files");
-                ui.add_space(4.0);
-
-                let can_extract = !self.extracting && !self.output_dir.is_empty();
-                ui.add_enabled_ui(can_extract, |ui| {
-                    if ui.button("Extract").clicked() {
-                        self.start_extraction();
-                    }
-                });
-            }
-
-            // --- Progress & Log ---
-            if self.extracting || self.done {
-                ui.add_space(8.0);
-                ui.separator();
-
-                let (current, total) = self.progress;
-                if total > 0 {
-                    let fraction = current as f32 / total as f32;
-                    ui.add(
-                        egui::ProgressBar::new(fraction).text(format!("{current}/{total}")),
-                    );
                 }
+            });
 
-                ui.add_space(4.0);
+            ui.add_space(4.0);
+            ui.checkbox(&mut self.include_meta, "Include .meta files");
+        });
+    }
 
-                egui::ScrollArea::vertical()
-                    .id_salt("log")
-                    .max_height(300.0)
-                    .stick_to_bottom(true)
-                    .show(ui, |ui| {
-                        for (level, msg) in &self.log {
-                            let color = match level {
-                                LogLevel::Info => ui.visuals().text_color(),
-                                LogLevel::Warning => egui::Color32::from_rgb(255, 200, 50),
-                                LogLevel::Error => egui::Color32::from_rgb(255, 80, 80),
-                            };
-                            ui.colored_label(color, msg);
-                        }
-                    });
+    fn render_extract_button(&mut self, ui: &mut egui::Ui) {
+        let can_extract = !self.extracting && !self.output_dir.is_empty();
 
+        ui.vertical_centered(|ui| {
+            let button = egui::Button::new(
+                egui::RichText::new(if self.extracting {
+                    "Extracting..."
+                } else {
+                    "Extract Package"
+                })
+                .size(15.0)
+                .strong()
+                .color(if can_extract {
+                    egui::Color32::WHITE
+                } else {
+                    TEXT_DIM
+                }),
+            )
+            .fill(if can_extract { ACCENT } else { BG_ELEVATED })
+            .corner_radius(8)
+            .min_size(egui::vec2(220.0, 42.0));
+
+            if ui.add_enabled(can_extract, button).clicked() {
+                self.start_extraction();
+            }
+        });
+    }
+
+    fn render_progress_section(&self, ui: &mut egui::Ui) {
+        card_frame().show(ui, |ui| {
+            ui.set_width(ui.available_width());
+
+            section_heading(
+                ui,
                 if self.done {
-                    ui.add_space(4.0);
-                    if ui.button("Open Output Folder").clicked() {
+                    "Complete"
+                } else {
+                    "Extracting"
+                },
+            );
+
+            let (current, total) = self.progress;
+            if total > 0 {
+                let fraction = current as f32 / total as f32;
+                progress_bar(ui, fraction, &format!("{current} / {total}"));
+            }
+
+            ui.add_space(10.0);
+
+            // Terminal-style log
+            egui::Frame::NONE
+                .fill(BG_TERMINAL)
+                .stroke(egui::Stroke::new(1.0, BORDER_SUBTLE))
+                .corner_radius(6)
+                .inner_margin(10.0)
+                .show(ui, |ui| {
+                    ui.set_width(ui.available_width());
+                    egui::ScrollArea::vertical()
+                        .id_salt("log")
+                        .max_height(220.0)
+                        .stick_to_bottom(true)
+                        .show(ui, |ui| {
+                            for (level, msg) in &self.log {
+                                let color = match level {
+                                    LogLevel::Info => TEXT_DIM,
+                                    LogLevel::Success => SUCCESS,
+                                    LogLevel::Warning => WARNING,
+                                    LogLevel::Error => ERROR,
+                                };
+                                ui.label(egui::RichText::new(msg).size(11.5).color(color));
+                            }
+                        });
+                });
+
+            if self.done {
+                ui.add_space(12.0);
+                ui.vertical_centered(|ui| {
+                    if styled_button(ui, "Open Output Folder", false) {
                         if let Some(ref dir) = self.final_output_dir {
                             open_folder(dir);
                         }
                     }
-                }
+                });
             }
         });
     }
 }
+
+// ── Styled Button ──────────────────────────────────────────────────────────
+
+fn styled_button(ui: &mut egui::Ui, label: &str, primary: bool) -> bool {
+    let button = if primary {
+        egui::Button::new(egui::RichText::new(label).size(13.0).color(egui::Color32::WHITE))
+            .fill(ACCENT)
+            .corner_radius(6)
+    } else {
+        egui::Button::new(egui::RichText::new(label).size(13.0).color(TEXT_PRIMARY)).corner_radius(6)
+    };
+    ui.add(button).clicked()
+}
+
+// ── Open Folder ────────────────────────────────────────────────────────────
 
 fn open_folder(path: &std::path::Path) {
     #[cfg(target_os = "windows")]
