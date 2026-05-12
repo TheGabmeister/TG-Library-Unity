@@ -73,7 +73,12 @@ fn scan_archive(package_path: &Path) -> Result<HashMap<String, GuidInfo>, String
             "pathname" => {
                 let mut s = String::new();
                 if entry.read_to_string(&mut s).is_ok() {
-                    let trimmed = s.trim().to_string();
+                    let trimmed = s
+                        .lines()
+                        .next()
+                        .unwrap_or("")
+                        .trim()
+                        .to_string();
                     if !trimmed.is_empty() {
                         pathnames.insert(guid, trimmed);
                     }
@@ -103,8 +108,10 @@ pub fn list_contents(package_path: &Path) -> Result<Vec<String>, String> {
 }
 
 fn sanitize_path(path: &str) -> String {
-    path.replace('\\', "/")
+    path.replace('\0', "")
+        .replace('\\', "/")
         .split('/')
+        .map(|c| c.trim_matches(|ch: char| ch.is_control()))
         .filter(|c| !c.is_empty() && *c != ".." && *c != ".")
         .collect::<Vec<_>>()
         .join("/")

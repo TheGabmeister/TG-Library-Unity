@@ -357,7 +357,7 @@ impl eframe::App for App {
 
                 egui::ScrollArea::vertical()
                     .id_salt("log")
-                    .max_height(150.0)
+                    .max_height(300.0)
                     .stick_to_bottom(true)
                     .show(ui, |ui| {
                         for (level, msg) in &self.log {
